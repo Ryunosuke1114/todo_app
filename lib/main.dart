@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:todo_app/add/add_page.dart';
 import 'firebase_options.dart';
 
 import 'main.model.dart';
@@ -19,6 +20,16 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'TODOアプリ',
+      home: MainPage(),
+    );
+  }
+}
+
+class MainPage extends StatelessWidget{
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'TODOアプリ',
       home: ChangeNotifierProvider<MainModel>(
         create: (_) => MainModel()..getTodoListRealtime(),
         child: Scaffold(
@@ -31,19 +42,30 @@ class MyApp extends StatelessWidget {
               children: todoList
                   .map(
                     (todo) => ListTile(
-                      title: Text(todo.title),
-                    ),
-                  )
+                  title: Text(todo.title),
+                ),
+              )
                   .toList(),
             );
           }),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {},
-            tooltip: 'Increment',
-            child: const Icon(Icons.add),
+          floatingActionButton:Consumer<MainModel>(builder: (context, model, child) {
+            return FloatingActionButton(
+                onPressed: () async{
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddPage(model),
+                      fullscreenDialog: true,
+                    ),
+                  );
+                },
+                child: const Icon(Icons.add),
+              );
+            }
           ),
         ),
       ),
     );
   }
+
 }

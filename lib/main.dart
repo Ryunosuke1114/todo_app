@@ -16,6 +16,7 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -25,7 +26,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MainPage extends StatelessWidget{
+class MainPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -35,37 +36,59 @@ class MainPage extends StatelessWidget{
         child: Scaffold(
           appBar: AppBar(
             title: Text('TODOアプリ'),
+            actions: [
+              Consumer<MainModel>(builder: (context, model, child) {
+                final isActive = model.checkedShouldActiveCompleteButton();
+                return ElevatedButton(
+                  onPressed: isActive
+                      ? () {
+                          model.deleatCheckedItems();
+                        }
+                      : null,
+                  child:  Text(
+                    '完了',
+                    style: TextStyle(
+                      color: isActive ? Colors.white : Colors.white.withOpacity(0.5),
+                    ),
+                  ),
+                );
+              }),
+            ],
           ),
           body: Consumer<MainModel>(builder: (context, model, child) {
             final todoList = model.todoList;
             return ListView(
               children: todoList
                   .map(
-                    (todo) => ListTile(
-                  title: Text(todo.title),
-                ),
-              )
+                    (todo) => CheckboxListTile(
+                      title: Text(todo.title),
+                      value: todo.isDone,
+                      onChanged: (bool? value) {
+                        todo.isDone = !todo.isDone;
+                        model.reload();
+                      },
+                    ),
+                  )
                   .toList(),
             );
           }),
-          floatingActionButton:Consumer<MainModel>(builder: (context, model, child) {
+          floatingActionButton:
+              Consumer<MainModel>(builder: (context, model, child) {
             return FloatingActionButton(
-                onPressed: () async{
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AddPage(model),
-                      fullscreenDialog: true,
-                    ),
-                  );
-                },
-                child: const Icon(Icons.add),
-              );
-            }
-          ),
+              onPressed: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddPage(model),
+                    fullscreenDialog: true,
+                  ),
+                );
+              },
+              child: const Icon(Icons.add),
+            );
+          }),
         ),
       ),
     );
   }
-
 }
